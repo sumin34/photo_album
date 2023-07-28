@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+//간단한 CRUD 처리
+//repository => bean 처리
 @Repository
 public interface AlbumRepository extends JpaRepository<Album, Long>{
-    List<Album> findByAlbumName(String name);
+    List<Album> findByAlbumNameLike(String name);
 
 }
