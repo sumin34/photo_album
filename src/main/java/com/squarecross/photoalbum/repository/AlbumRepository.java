@@ -6,6 +6,7 @@ import java.util.List;
 
 //간단한 CRUD 처리
 //repository => bean 처리
+//그럼 이게 model?
 @Repository
 public interface AlbumRepository extends JpaRepository<Album, Long>{
     List<Album> findByAlbumNameLike(String name);

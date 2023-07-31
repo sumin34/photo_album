@@ -12,6 +12,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 //service 어노테이션 bean등록d
+//model?
 @Service
 public class AlbumService {
     //등록된 빈을 컨테이너에서 가져와서 사용 가능
