@@ -34,4 +34,12 @@ public class AlbumService {
             throw new EntityNotFoundException(String.format("앨범 아이디 %d로 조회되지 않았습니다", albumId));
         }
     }
+    /**
+    public AlbumDto getAlbum(String albumName){
+        String res = albumRepository.findByAlbumName(albumName);
+
+        AlbumDto albumDto = AlbumMapper.convertToDto();
+        return albumDto;
+    }
+     */
 }
