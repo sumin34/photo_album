@@ -101,12 +101,29 @@ public class AlbumService {
         String albumPath = Constants.PATH_PREFIX+"/photos/original/"+album.getAlbumId();
         String thumbPath = Constants.PATH_PREFIX + "/photos/thumb/" + album.getAlbumId();
 
-        deleteDirectory(new File(albumPath));
-        deleteDirectory(new File(thumbPath));
+        deleteDirectory(albumPath);
+        deleteDirectory(thumbPath);
     }
 
-    private void deleteDirectory(File directory) throws IOException {
+    private void deleteDirectory(String path) throws IOException {
+        File folder = new File(path);
 
+        try{
+            while(folder.exists()){
+                File[] folder_list = folder.listFiles();
+
+                for(int j=0;j<folder_list.length;j++){
+                    folder_list[j].delete();
+                    System.out.println("파일이 삭제되었습니다.");
+                }
+                if(folder_list.length == 0&&folder.isDirectory()){
+                    folder.delete();
+                    System.out.println("폴더가 삭제되었습니다.");
+                }
+            }
+        }catch (Exception e){
+            e.getStackTrace();
+        }
     }
 }
     /**
