@@ -24,6 +24,10 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	//image resize
+	implementation 'org.imgscalr:imgscalr-lib:4.2'
+	implementation 'net.coobird:thumbnailator:0.4.17'
+
 
 	//jpa
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
