@@ -2,6 +2,7 @@ package com.squarecross.photoalbum.controller;
 
 import com.squarecross.photoalbum.dto.PhotoDto;
 import com.squarecross.photoalbum.service.PhotoService;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,5 +52,29 @@ public class PhotoController {
                 photos.add(photoDto);
         }
         return new ResponseEntity<>(photos, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/download",method = RequestMethod.GET)
+    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds,
+                               HttpServletResponse response){
+        try{
+            if(photoIds.length == 1){ //사진 파일이 하나일때
+                File file = photoService.getImageFile(photoIds[0]);
+                OutputStream outputStream = response.getOutputStream();
+                IOUtils.copy(new FileInputStream(file),outputStream);
+                outputStream.close();
+            }
+            else{//다운로드 할 사진 파일이 여러개 일때 zip 으로 압축후 다운
+                InputStream inputStream = photoService.getZipFile(photoIds);
+                OutputStream outputStream = response.getOutputStream();
+                IOUtils.copy(inputStream,outputStream);
+                outputStream.close();
+            }
+        }catch (FileNotFoundException e){
+            throw new RuntimeException("Error");
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

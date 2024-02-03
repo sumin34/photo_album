@@ -10,6 +10,7 @@ import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
@@ -18,12 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class PhotoService {
@@ -128,7 +131,46 @@ public class PhotoService {
         return fileName;
     }
 
-//    public List<PhotoDto> getPhotoList(String keyword, String sort){
-//
-//    }
+    public File getImageFile(Long photoId){
+        Optional<Photo> res = photoRepository.findById(photoId);
+        if(res.isEmpty()){
+            throw new EntityNotFoundException(String.format("사진 ID %d를 찾을 수 없습니다.",photoId));
+        }
+        return new File(Constants.PATH_PREFIX + res.get().getOriginalUrl());
+    }
+
+    public Optional<List<Photo>> findPhotosByIds(Long[] photoIds){
+        List<Photo> photos = photoRepository.findAllById(Arrays.asList(photoIds));
+
+        return photos.isEmpty() ? Optional.empty() : Optional.of(photos);
+    }
+
+    public InputStream getZipFile(Long[] photoIds) throws IOException {
+        Optional<List<Photo>> res = findPhotosByIds(photoIds);
+
+        if(res.isPresent()) {
+            List<Photo> photos = res.get();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try(ZipOutputStream zipOutputStream=new ZipOutputStream(baos)){
+                for(Photo photo : photos){
+                    File file = new File(Constants.PATH_PREFIX+photo.getOriginalUrl());
+                    ZipEntry zipEntry = new ZipEntry(photo.getFileName());
+                    zipOutputStream.putNextEntry(zipEntry);
+
+                    try(FileInputStream fileInputStream= new FileInputStream(file)){
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while((len=fileInputStream.read(buffer))>0){
+                            zipOutputStream.write(buffer,0,len);
+                        }
+                    }
+                    zipOutputStream.closeEntry();
+                }
+            }
+            return new ByteArrayInputStream(baos.toByteArray());
+        }else {
+            throw new EntityNotFoundException();
+        }
+    }
 }
